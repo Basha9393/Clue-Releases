@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clue — AI Interview Copilot</title>
+  <meta name="description" content="Real-time AI interview copilot. Live transcription, instant answers, stealth mode. Available on macOS & Windows from ₹299."/>
+  <meta property="og:title" content="Clue — AI Interview Copilot"/>
+  <meta property="og:description" content="Real-time AI assistance for job interviews. Transcription, instant answers, stealth mode. Starting at ₹299."/>
+  <meta property="og:url" content="https://cluehire.com"/>
+  <meta property="og:image" content="https://cluehire.com/logo2.png"/>
+  <meta property="og:type" content="website"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:site" content="@cluehire"/>
+  <link rel="icon" href="logo2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #090909;
+      --bg2:      #0f0f0f;
+      --bg3:      #141414;
+      --surface:  #1a1a1a;
+      --border:   #1e1e1e;
+      --border2:  #2c2c2c;
+      --text:     #efefef;
+      --text2:    #aaaaaa;
+      --muted:    #555560;
+      --accent:   #b9ff46;
+      --accent-dim: rgba(185,255,70,0.07);
+      --accent-border: rgba(185,255,70,0.22);
+      --red:      #ff4f4f;
+      --amber:    #f0a000;
+      --green:    #3de083;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(185,255,70,0.25); color: #090909; }
+    mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 56px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    nav.scrolled { background: rgba(9,9,9,0.97); }
+    .nav-left { display: flex; align-items: center; gap: 40px; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo img { width: 26px; height: 26px; border-radius: 6px; }
+    .logo-text {
+      font-size: 17px; font-weight: 900; letter-spacing: -0.8px; color: var(--text);
+    }
+    .logo-dot { color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      transition: color .15s; padding: 2px 0;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .btn-ghost-nav {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      padding: 6px 14px; border: 1px solid var(--border2);
+      background: transparent; border-radius: 4px; transition: all .15s;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-ghost-nav:hover { color: var(--text); border-color: #3a3a3a; }
+    .btn-cta-nav {
+      font-size: 12px; font-weight: 800; color: #090909;
+      padding: 7px 18px; background: var(--accent);
+      border-radius: 4px; transition: all .2s;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-cta-nav:hover { opacity: 0.88; }
+
+    /* hamburger */
+    .hamburger {
+      display: none; flex-direction: column; gap: 4px; cursor: pointer;
+      padding: 6px; border-radius: 4px; border: 1px solid var(--border2);
+      background: var(--bg3);
+    }
+    .hamburger span {
+      display: block; width: 16px; height: 1.5px; background: var(--text2); border-radius: 1px; transition: all .25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+    /* mobile menu */
+    .mobile-menu {
+      display: none; position: fixed; top: 56px; left: 0; right: 0; z-index: 999;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 20px 24px; flex-direction: column; gap: 4px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      padding: 10px 12px; border-radius: 4px; font-size: 14px; font-weight: 600;
+      color: var(--text2); transition: all .15s;
+    }
+    .mobile-menu a:hover { color: var(--text); background: var(--bg3); }
+    .mobile-menu .mob-cta {
+      margin-top: 8px; padding: 12px; border-radius: 4px;
+      background: var(--accent); color: #090909; text-align: center;
+      font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* ── STICKY CTA ── */
+    .sticky-cta {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+      z-index: 900; display: flex; align-items: center; gap: 14px;
+      background: var(--bg3); border: 1px solid var(--border2); border-radius: 4px;
+      padding: 10px 10px 10px 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .4s;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+    }
+    .sticky-cta.visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+    .sticky-cta-text { font-size: 13px; font-weight: 600; color: var(--text2); }
+    .sticky-cta-text strong { color: var(--text); }
+    .sticky-cta-btn {
+      padding: 8px 18px; border-radius: 3px; background: var(--accent);
+      color: #090909; font-size: 12px; font-weight: 800; transition: opacity .15s;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .sticky-cta-btn:hover { opacity: 0.85; }
+    .sticky-cta-close {
+      width: 28px; height: 28px; border-radius: 3px; border: 1px solid var(--border2);
+      background: transparent; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s;
+    }
+    .sticky-cta-close:hover { color: var(--text); background: var(--surface); }
+
+    /* ── SCROLL TOP ── */
+    .scroll-top {
+      position: fixed; bottom: 20px; right: 20px; z-index: 900;
+      width: 36px; height: 36px; border-radius: 4px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      opacity: 0; pointer-events: none; transition: all .25s;
+    }
+    .scroll-top.visible { opacity: 1; pointer-events: all; }
+    .scroll-top:hover { color: var(--text); border-color: #3a3a3a; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 80px 40px 60px;
+      max-width: 1200px; margin: 0 auto;
+      gap: 64px;
+    }
+    .hero-left { padding-top: 24px; }
+    .hero-status {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500; color: var(--accent);
+      margin-bottom: 32px; letter-spacing: 0.3px;
+    }
+    .status-dot {
+      width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+      animation: pulse-dot 2.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(185,255,70,.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(185,255,70,0); }
+    }
+    .hero-divider { color: var(--border2); margin: 0 4px; }
+
+    h1 {
+      font-size: clamp(44px, 6vw, 80px);
+      font-weight: 900; letter-spacing: -3px; line-height: 0.97;
+      margin-bottom: 24px; color: var(--text);
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 16px; color: var(--text2); max-width: 480px;
+      line-height: 1.75; margin-bottom: 36px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 4px;
+      background: var(--accent); color: #090909;
+      font-size: 14px; font-weight: 800;
+      transition: opacity .15s; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 26px; border-radius: 4px;
+      border: 1px solid var(--border2); color: var(--text2);
+      font-size: 14px; font-weight: 600; transition: all .15s;
+    }
+    .btn-outline:hover { border-color: #3a3a3a; color: var(--text); }
+
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .htag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500; color: var(--muted);
+      padding: 3px 8px; border: 1px solid var(--border);
+      border-radius: 2px; letter-spacing: 0.3px;
+      transition: color .15s, border-color .15s;
+    }
+    .htag:hover { color: var(--text2); border-color: var(--border2); }
+
+    /* hero terminal */
+    .hero-right { position: relative; }
+    .term-window {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 6px; overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    }
+    .term-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; background: var(--bg3); border-bottom: 1px solid var(--border);
+    }
+    .tdot { width: 10px; height: 10px; border-radius: 50%; }
+    .tdot-r { background: #ff5f57; } .tdot-y { background: #febc2e; } .tdot-g { background: #28c840; }
+    .term-title { flex: 1; text-align: center; font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .term-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; padding: 2px 7px; border-radius: 2px;
+      background: var(--accent-dim); border: 1px solid var(--accent-border);
+      color: var(--accent); font-weight: 700; letter-spacing: 0.5px;
+    }
+    .term-body { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; }
+    .t-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
+    .t-speaker { color: var(--muted); margin-right: 4px; }
+    .t-text { color: var(--text2); }
+    .t-text b { color: var(--text); font-weight: 500; }
+    .t-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .t-ai-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px;
+    }
+    .t-ans-line { color: var(--text2); margin-bottom: 4px; }
+    .t-ans-line b { color: var(--text); font-weight: 500; }
+    .t-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; background: var(--bg3); border-top: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    }
+    .t-foot-item { color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .t-foot-item .on { color: var(--accent); }
+    .blink { display: inline-block; width: 7px; height: 13px; background: var(--accent); margin-left: 1px; animation: bc 1s step-end infinite; vertical-align: middle; opacity: 0.8; }
+    @keyframes bc { 0%,100%{opacity:0.8} 50%{opacity:0} }
+
+    /* ── TRUST BAR ── */
+    .trust-bar {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .trust-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; flex-wrap: wrap;
+    }
+    .trust-item {
+      padding: 22px 32px; text-align: center;
+      border-right: 1px solid var(--border); flex: 1; min-width: 140px;
+    }
+    .trust-item:last-child { border-right: none; }
+    .trust-num {
+      font-size: 28px; font-weight: 900; letter-spacing: -1.5px;
+      line-height: 1; color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .trust-num .acc { color: var(--accent); }
+    .trust-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── WORKS WITH ── */
+    .tools-strip {
+      position: relative; z-index: 1;
+      padding: 28px 40px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .tools-inner { max-width: 1200px; margin: 0 auto; }
+    .tools-strip-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .tools-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .tool-chip {
+      display: inline-flex; align-items: center; gap: 0;
+      padding: 5px 12px; border-radius: 3px;
+      border: 1px solid var(--border); background: var(--bg2);
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      transition: all .15s; letter-spacing: 0.3px;
+    }
+    .tool-chip:hover { border-color: var(--border2); color: var(--text2); }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; padding: 100px 40px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .sec-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px;
+    }
+    .sec-label .idx { color: var(--accent); }
+    h2 {
+      font-size: clamp(28px, 4vw, 48px); font-weight: 900;
+      letter-spacing: -2px; line-height: 1.07; margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 15px; color: var(--text2); max-width: 520px;
+      line-height: 1.8; margin-bottom: 64px;
+    }
+    .bg-alt { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0; border: 1px solid var(--border2); border-radius: 6px; overflow: hidden;
+    }
+    .feat {
+      padding: 36px 30px; background: var(--bg);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transition: background .2s;
+    }
+    .feat:hover { background: var(--bg2); }
+    .feat:nth-child(3n) { border-right: none; }
+    .feat:nth-child(n+4) { border-bottom: none; }
+    .feat-icon {
+      width: 44px; height: 44px; border-radius: 4px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 700; letter-spacing: -0.5px;
+      border: 1px solid var(--border2); background: var(--bg3); color: var(--text2);
+    }
+    .feat-icon.accent { border-color: var(--accent-border); background: var(--accent-dim); color: var(--accent); }
+    .feat h3 { font-size: 15px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.2px; }
+    .feat p { font-size: 13px; color: var(--text2); line-height: 1.75; flex: 1; }
+    .feat-tag {
+      display: inline-block; margin-top: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 2px;
+      border: 1px solid; width: fit-content;
+    }
+    .ft-green { background: rgba(61,224,131,0.06); color: var(--green); border-color: rgba(61,224,131,0.2); }
+    .ft-accent { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+    .ft-amber { background: rgba(240,160,0,0.06); color: var(--amber); border-color: rgba(240,160,0,0.2); }
+    .ft-red { background: rgba(255,79,79,0.06); color: var(--red); border-color: rgba(255,79,79,0.2); }
+    .ft-muted { background: rgba(85,85,96,0.1); color: var(--text2); border-color: var(--border2); }
+
+    /* ── PRIVACY BLOCK ── */
+    .privacy-block {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 0; border: 1px solid var(--border2); border-radius: 6px;
+      overflow: hidden; margin-top: 64px;
+    }
+    .priv-card {
+      padding: 32px 28px; background: var(--bg3);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transition: background .2s;
+    }
+    .priv-card:last-child { border-right: none; }
+    .priv-card:hover { background: var(--surface); }
+    .priv-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      margin-bottom: 14px; letter-spacing: 0.5px;
+    }
+    .priv-card h4 { font-size: 14px; font-weight: 800; margin-bottom: 10px; }
+    .priv-card p { font-size: 13px; color: var(--text2); line-height: 1.7; flex: 1; }
+    .priv-badge {
+      margin-top: 16px; display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .priv-badge::before { content: '✓'; }
+
+    /* ── MODES ── */
+    .modes-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .mode-card {
+      padding: 32px 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg);
+      position: relative; overflow: hidden; transition: border-color .25s;
+    }
+    .mode-card:hover { border-color: var(--border2); }
+    .mode-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .mc-pulse::before { background: var(--green); }
+    .mc-echo::before  { background: var(--amber); }
+    .mc-fusion::before { background: var(--accent); }
+    .mode-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .mode-name { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .mode-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 16px; display: inline-block;
+      padding: 3px 8px; border-radius: 2px; border: 1px solid;
+    }
+    .mt-green { color: var(--green); border-color: rgba(61,224,131,0.25); background: rgba(61,224,131,0.06); }
+    .mt-amber { color: var(--amber); border-color: rgba(240,160,0,0.25); background: rgba(240,160,0,0.06); }
+    .mt-accent { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+    .mode-desc { font-size: 13px; color: var(--text2); line-height: 1.75; }
+    .modes-note {
+      margin-top: 24px; padding: 20px 24px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+      font-size: 13px; color: var(--text2); line-height: 1.7;
+    }
+    .modes-note strong { color: var(--text); }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; position: relative; }
+    .steps-line {
+      position: absolute; top: 21px; left: calc(12.5%); right: calc(12.5%);
+      height: 1px; background: var(--border2);
+    }
+    .step { padding: 0 4px; }
+    .step-num {
+      width: 42px; height: 42px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--border2); background: var(--bg3);
+      color: var(--accent); margin-bottom: 20px; position: relative; z-index: 1;
+    }
+    .step h3 { font-size: 14px; font-weight: 800; margin-bottom: 8px; }
+    .step p { font-size: 13px; color: var(--text2); line-height: 1.75; }
+
+    /* ── PLATFORM ── */
+    .platform-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .plat-card {
+      padding: 32px 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg2);
+      transition: border-color .2s;
+    }
+    .plat-card:hover { border-color: var(--border2); }
+    .plat-name-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .plat-name { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; }
+    .plat-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 3px 8px; border-radius: 2px; border: 1px solid;
+    }
+    .pb-green { background: rgba(61,224,131,0.06); color: var(--green); border-color: rgba(61,224,131,0.25); }
+    .pb-amber { background: rgba(240,160,0,0.06); color: var(--amber); border-color: rgba(240,160,0,0.25); }
+    .plat-card p { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+    /* ── COMPARISON TABLE ── */
+    .compare-wrap {
+      overflow-x: auto; border-radius: 6px;
+      border: 1px solid var(--border2);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--bg3); }
+    thead th {
+      padding: 16px 20px; text-align: left;
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      border-bottom: 1px solid var(--border2); white-space: nowrap;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    thead th:first-child { width: 200px; }
+    thead th.th-us { color: var(--accent); background: var(--accent-dim); }
+    .th-logo { display: flex; align-items: center; gap: 8px; }
+    .th-logo img { width: 18px; height: 18px; border-radius: 4px; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.015); }
+    tbody td { padding: 13px 20px; font-size: 13px; color: var(--text2); vertical-align: middle; }
+    tbody td:first-child { font-weight: 700; color: var(--text); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+    tbody td.td-us { background: rgba(185,255,70,0.03); }
+    .check { color: var(--green); font-size: 14px; font-weight: 700; }
+    .cross { color: var(--border2); font-size: 14px; }
+    .partial { color: var(--amber); font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .td-price { font-size: 14px; font-weight: 900; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+    .td-price.best { color: var(--accent); }
+
+    /* ── PRICING ── */
+    .pricing-section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--muted); margin-bottom: 16px;
+    }
+    .subs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 12px; }
+    .packs-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .plan-card {
+      padding: 28px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg);
+      position: relative; overflow: hidden; transition: border-color .2s;
+    }
+    .plan-card:hover { border-color: var(--border2); }
+    .plan-card.featured {
+      border-color: var(--accent-border);
+      background: var(--accent-dim);
+    }
+    .plan-chip {
+      position: absolute; top: 12px; right: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; padding: 3px 8px; border-radius: 2px;
+    }
+    .chip-accent { background: var(--accent); color: #090909; }
+    .chip-muted  { background: var(--bg3); color: var(--muted); border: 1px solid var(--border2); }
+    .plan-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.2px; }
+    .plan-desc { font-size: 11px; color: var(--muted); margin-bottom: 18px; font-family: 'JetBrains Mono', monospace; }
+    .plan-price {
+      font-size: 38px; font-weight: 900; letter-spacing: -2px;
+      line-height: 1; font-family: 'JetBrains Mono', monospace;
+    }
+    .plan-price sup { font-size: 18px; font-weight: 700; letter-spacing: 0; vertical-align: super; }
+    .plan-price .per { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .plan-mins { font-size: 12px; color: var(--text2); margin: 10px 0 20px; font-family: 'JetBrains Mono', monospace; }
+    .plan-mins strong { color: var(--text); }
+    .inf { color: var(--accent); font-weight: 900; font-size: 16px; }
+    .btn-plan {
+      display: block; width: 100%; padding: 10px;
+      border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer;
+      text-align: center; border: 1px solid var(--border2);
+      background: transparent; color: var(--text); transition: all .15s;
+      font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-plan:hover { background: var(--bg3); border-color: #3a3a3a; }
+    .btn-plan.featured-btn { background: var(--accent); color: #090909; border-color: transparent; }
+    .btn-plan.featured-btn:hover { opacity: 0.85; }
+    .pricing-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 20px; line-height: 1.7; font-family: 'JetBrains Mono', monospace; }
+    .pricing-note a { color: var(--accent); }
+
+    /* ── TESTIMONIALS ── */
+    .tgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .tcard {
+      padding: 28px; border-radius: 6px; background: var(--bg2);
+      border: 1px solid var(--border); transition: border-color .2s;
+      display: flex; flex-direction: column;
+    }
+    .tcard:hover { border-color: var(--border2); }
+    .tcard-stars {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--accent); margin-bottom: 14px;
+      letter-spacing: 4px;
+    }
+    .tcard-text {
+      font-size: 13px; color: var(--text2); line-height: 1.8;
+      margin-bottom: 20px; flex: 1;
+      border-left: 2px solid var(--border2); padding-left: 14px;
+    }
+    .tcard-author { display: flex; align-items: center; gap: 10px; }
+    .tcard-av {
+      width: 34px; height: 34px; border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg3); border: 1px solid var(--border2); color: var(--text2);
+    }
+    .tcard-name { font-size: 13px; font-weight: 800; }
+    .tcard-role { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── FAQ ── */
+    .faq-wrap { max-width: 720px; margin: 0 auto; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-btn {
+      width: 100%; display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 0; background: none; border: none; color: var(--text);
+      font-size: 14px; font-weight: 700; text-align: left; cursor: pointer;
+      font-family: inherit; gap: 20px; transition: color .15s;
+    }
+    .faq-btn:hover { color: #fff; }
+    .faq-icon {
+      width: 22px; height: 22px; border-radius: 3px; flex-shrink: 0;
+      border: 1px solid var(--border2); background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text2); transition: all .2s; font-style: normal;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); border-color: var(--accent-border); color: var(--accent); }
+    .faq-body { display: none; padding: 0 0 18px; font-size: 13px; color: var(--text2); line-height: 1.85; }
+    .faq-item.open .faq-body { display: block; }
+
+    /* ── CONTACT ── */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    .contact-info h3 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .contact-info > p { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 28px; }
+    .contact-links { display: flex; flex-direction: column; gap: 8px; }
+    .clink {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 4px; transition: border-color .15s; color: var(--text2); font-size: 12px;
+    }
+    .clink:hover { border-color: var(--border2); color: var(--text); }
+    .clink-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .clink-value { font-size: 12px; color: var(--text2); }
+    .contact-form {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 32px;
+    }
+    .contact-form h4 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .contact-form > p { font-size: 12px; color: var(--muted); margin-bottom: 24px; font-family: 'JetBrains Mono', monospace; }
+    .form-field { margin-bottom: 14px; }
+    .form-field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; }
+    .form-field input, .form-field textarea, .form-field select {
+      width: 100%; padding: 10px 14px; border-radius: 4px;
+      background: var(--bg3); border: 1px solid var(--border2);
+      color: var(--text); font-family: inherit; font-size: 13px;
+      transition: border-color .15s; outline: none; resize: vertical;
+    }
+    .form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+      border-color: var(--accent-border); box-shadow: 0 0 0 2px var(--accent-dim);
+    }
+    .form-field input::placeholder, .form-field textarea::placeholder { color: var(--muted); }
+    .form-field select option { background: var(--bg3); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-send {
+      width: 100%; padding: 12px; border-radius: 4px; border: none;
+      background: var(--accent); color: #090909; font-size: 13px; font-weight: 800;
+      cursor: pointer; font-family: inherit; transition: opacity .15s;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .btn-send:hover { opacity: 0.85; }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      text-align: center; padding: 140px 40px;
+      background: var(--bg2); border-top: 1px solid var(--border);
+    }
+    .cta-section h2 { font-size: clamp(34px, 5vw, 58px); margin-bottom: 16px; }
+    .cta-section > .container > p {
+      color: var(--text2); font-size: 16px; margin-bottom: 44px;
+      max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.75;
+    }
+    .cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .cta-note {
+      font-size: 11px; color: var(--muted); margin-top: 20px;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;
+    }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); background: var(--bg2); }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+      padding: 64px 40px 48px; max-width: 1200px; margin: 0 auto;
+    }
+    .footer-brand p {
+      font-size: 12px; color: var(--muted); line-height: 1.75;
+      max-width: 260px; margin-bottom: 20px; margin-top: 14px;
+    }
+    .footer-socials { display: flex; gap: 8px; }
+    .soc {
+      width: 32px; height: 32px; border-radius: 4px;
+      border: 1px solid var(--border2); background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; transition: all .15s; color: var(--muted);
+    }
+    .soc:hover { border-color: #3a3a3a; color: var(--text); }
+    .footer-col h4 {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--muted); margin-bottom: 18px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .footer-col a {
+      display: block; font-size: 12px; color: var(--muted);
+      margin-bottom: 10px; transition: color .15s;
+    }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px; border-top: 1px solid var(--border);
+      max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 10px;
+    }
+    .footer-bottom p { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 11px; color: var(--muted); transition: color .15s; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up { opacity: 0; transform: translateY(20px); transition: opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1); }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up-d1 { transition-delay: .08s; }
+    .fade-up-d2 { transition-delay: .16s; }
+    .fade-up-d3 { transition-delay: .24s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; gap: 48px; padding: 90px 24px 60px; }
+      .hero-right { max-width: 600px; }
+    }
+    @media (max-width: 960px) {
+      nav { padding: 0 20px; }
+      section { padding: 72px 24px; }
+      .tools-strip { padding: 24px; }
+      .nav-links { display: none; }
+      .nav-right .btn-ghost-nav { display: none; }
+      .hamburger { display: flex; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feat:nth-child(3n) { border-right: 1px solid var(--border); }
+      .feat { border-right: none; }
+      .modes-grid, .steps-grid, .platform-grid, .subs-grid, .contact-grid { grid-template-columns: 1fr; }
+      .packs-grid { grid-template-columns: repeat(2,1fr); }
+      .tgrid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; padding: 40px 24px; }
+      .footer-bottom { padding: 16px 24px; }
+      .steps-line { display: none; }
+      .privacy-block { grid-template-columns: 1fr; }
+      .priv-card { border-right: none; border-bottom: 1px solid var(--border); }
+      .priv-card:last-child { border-bottom: none; }
+      .sticky-cta-text { display: none; }
+      h1 { letter-spacing: -2px; }
+    }
+    @media (max-width: 600px) {
+      .packs-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .trust-item { min-width: 120px; padding: 18px 16px; }
+      .trust-inner { flex-wrap: wrap; }
+    }
+
+    /* ── ANNOUNCEMENT BAR ── */
+    .announce-bar {
+      position: relative; z-index: 1001;
+      background: var(--accent-dim); border-bottom: 1px solid var(--accent-border);
+      padding: 9px 24px; display: flex; align-items: center; justify-content: center; gap: 16px;
+      font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    }
+    .announce-bar .ab-text { color: var(--text2); }
+    .announce-bar .ab-text strong { color: var(--accent); }
+    .announce-bar .ab-link {
+      color: var(--accent); font-weight: 700; border: 1px solid var(--accent-border);
+      padding: 3px 10px; border-radius: 3px; transition: background .15s; white-space: nowrap;
+    }
+    .announce-bar .ab-link:hover { background: var(--accent-dim); }
+    @media (max-width: 600px) { .announce-bar { flex-direction: column; gap: 6px; text-align: center; } }
+
+    /* ── DOWNLOAD SECTION ── */
+    .download-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 0;
+      border: 1px solid var(--border2); margin-top: 40px;
+    }
+    .dl-card {
+      padding: 28px 24px; border-right: 1px solid var(--border2);
+      background: var(--surface); transition: background .2s;
+    }
+    .dl-card:hover { background: var(--bg3); }
+    .dl-card:last-child { border-right: none; }
+    .dl-platform {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .dl-chip {
+      font-size: 12px; color: var(--text2); margin-bottom: 20px;
+    }
+    .dl-meta {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);
+      margin-bottom: 20px; line-height: 1.8;
+    }
+    .btn-download {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 10px 16px; min-height: 44px;
+      font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      background: var(--accent); color: #090909;
+      border: none; border-radius: 3px; cursor: pointer; transition: opacity .15s;
+    }
+    .btn-download:hover { opacity: 0.85; }
+    .btn-download.ghost {
+      background: transparent; color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+    .btn-download.ghost:hover { color: var(--text); border-color: #3a3a3a; }
+    .dl-alt {
+      margin-top: 8px; font-size: 11px; color: var(--muted);
+      font-family: 'JetBrains Mono', monospace; text-align: center;
+    }
+    .dl-alt a { color: var(--muted); text-decoration: underline; }
+    .dl-alt a:hover { color: var(--text2); }
+    .dl-sysreq {
+      margin-top: 24px; padding: 14px 18px;
+      border: 1px solid var(--border); background: var(--bg2);
+      font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted);
+      line-height: 1.9;
+    }
+    .dl-free-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 16px 20px; border: 1px solid var(--accent-border);
+      background: var(--accent-dim); margin-top: 24px; flex-wrap: wrap;
+    }
+    .dl-free-banner .dfb-text { font-size: 13px; font-weight: 600; color: var(--text); }
+    .dl-free-banner .dfb-text strong { color: var(--accent); }
+    .dl-free-banner .dfb-link {
+      font-size: 12px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+      color: #090909; background: var(--accent); padding: 8px 18px;
+      border-radius: 3px; white-space: nowrap; min-height: 44px;
+      display: inline-flex; align-items: center;
+    }
+    @media (max-width: 960px) { .download-grid { grid-template-columns: 1fr; } .dl-card { border-right: none; border-bottom: 1px solid var(--border2); } .dl-card:last-child { border-bottom: none; } }
+  </style>
+</head>
+<body>
+
+<!-- ANNOUNCEMENT BAR -->
+<div class="announce-bar">
+  <span class="ab-text"><strong>✦ New accounts get 20 free minutes</strong> — feel the full experience before you pay. No card required.</span>
+  <a href="/account.html" class="ab-link">Create Free Account →</a>
+</div>
+
+<!-- STICKY CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <div class="sticky-cta-text"><strong>Clue</strong> — AI Interview Copilot</div>
+  <a href="mailto:support@cluehire.com?subject=Starter Pack" class="sticky-cta-btn">Start for ₹299</a>
+  <button class="sticky-cta-close" onclick="dismissSticky()" aria-label="Dismiss">✕</button>
+</div>
+
+<!-- SCROLL TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-left">
+    <a class="logo" href="#">
+      <img src="logo2.png" alt="Clue"/>
+      <span class="logo-text">Clue<span class="logo-dot">.</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#modes">Modes</a>
+      <a href="#download">Download</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <a href="#contact" class="btn-ghost-nav">Talk to us</a>
+    <a href="/account.html" class="btn-ghost-nav" id="nav-signin">Sign In</a>
+    <a href="/account.html" id="nav-avatar" style="display:none;width:30px;height:30px;border-radius:4px;overflow:hidden;cursor:pointer;border:1px solid var(--accent-border);flex-shrink:0"></a>
+    <a href="#pricing" class="btn-cta-nav">Get Started</a>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features"   onclick="closeMenu()">Features</a>
+  <a href="#modes"      onclick="closeMenu()">Modes</a>
+  <a href="#download"   onclick="closeMenu()">Download</a>
+  <a href="#pricing"    onclick="closeMenu()">Pricing</a>
+  <a href="#reviews"    onclick="closeMenu()">Reviews</a>
+  <a href="#faq"        onclick="closeMenu()">FAQ</a>
+  <a href="#contact"    onclick="closeMenu()">Contact</a>
+  <a href="mailto:support@cluehire.com?subject=Starter Pack" class="mob-cta" onclick="closeMenu()">Start for ₹299</a>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-status">
+      <span class="status-dot"></span>
+      LIVE<span class="hero-divider">·</span>macOS &amp; Windows<span class="hero-divider">·</span>v1.0<span class="hero-divider">·</span><span style="color:var(--accent);font-weight:700">20 min free on signup</span>
+    </div>
+
+    <h1>
+      The interview<br/>
+      edge you<br/>
+      didn't have.<br/>
+      <em>Until now.</em>
+    </h1>
+
+    <p class="hero-sub">
+      Clue listens to your interview in real time, transcribes every question, and delivers structured AI answers in seconds — invisible to screen share.
+    </p>
+
+    <div class="hero-actions">
+      <a href="/account.html" class="btn-primary">Start Free — 20 Min Included →</a>
+      <a href="#download" class="btn-outline">Download App ↓</a>
+    </div>
+    <p style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:10px;">No card required · Plans from ₹299 after trial</p>
+
+    <div class="hero-tags">
+      <span class="htag">Behavioral</span>
+      <span class="htag">System Design</span>
+      <span class="htag">LeetCode</span>
+      <span class="htag">HR Rounds</span>
+      <span class="htag">Coding Tests</span>
+      <span class="htag">Case Studies</span>
+      <span class="htag">Architecture</span>
+      <span class="htag">MCQs</span>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="term-window">
+      <div class="term-bar">
+        <div class="tdot tdot-r"></div>
+        <div class="tdot tdot-y"></div>
+        <div class="tdot tdot-g"></div>
+        <div class="term-title">clue — live session · pulse mode</div>
+        <div class="term-badge">● REC</div>
+      </div>
+      <div class="term-body">
+        <div class="t-label">// live transcript</div>
+        <div style="margin-bottom:8px">
+          <span class="t-speaker">[interviewer]</span>
+          <span class="t-text" id="txText1"></span><span class="blink"></span>
+        </div>
+        <div style="margin-bottom:8px">
+          <span class="t-speaker">[you]</span>
+          <span class="t-text">Sure — at my last role, I led a cross-functional team of eight across engineering and design...</span>
+        </div>
+
+        <div class="t-divider"></div>
+
+        <div class="t-ai-label">// clue ai · behavioral · star format</div>
+        <div class="t-ans-line"><b>situation</b> &nbsp;At Zoho, I led a 3-team onboarding redesign with a 2-week hard deadline.</div>
+        <div class="t-ans-line"><b>action</b> &nbsp;&nbsp;&nbsp;&nbsp;Daily 15-min standups + shared tracking board. Personally unblocked reviews nightly.</div>
+        <div class="t-ans-line"><b>result</b> &nbsp;&nbsp;&nbsp;&nbsp;Shipped on time. User activation <b style="color:var(--accent)">+34%</b> in the first sprint post-launch.</div>
+      </div>
+      <div class="t-footer">
+        <span class="t-foot-item">mode <span class="on">pulse</span></span>
+        <span class="t-foot-item">mic <span class="on">on</span></span>
+        <span class="t-foot-item">stealth <span class="on">enabled</span></span>
+        <span class="t-foot-item">41:23 left</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item fade-up">
+      <div class="trust-num"><span class="acc">3</span></div>
+      <div class="trust-label">Transcription Modes</div>
+    </div>
+    <div class="trust-item fade-up fade-up-d1">
+      <div class="trust-num"><span class="acc">2</span></div>
+      <div class="trust-label">AI Engines</div>
+    </div>
+    <div class="trust-item fade-up fade-up-d2">
+      <div class="trust-num">₹<span class="acc">299</span></div>
+      <div class="trust-label">Starting Price</div>
+    </div>
+    <div class="trust-item fade-up fade-up-d3">
+      <div class="trust-num"><span class="acc">0</span></div>
+      <div class="trust-label">Audio Stored on Servers</div>
+    </div>
+    <div class="trust-item fade-up">
+      <div class="trust-num"><span class="acc">2</span></div>
+      <div class="trust-label">Platforms Supported</div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKS WITH -->
+<div class="tools-strip">
+  <div class="tools-inner">
+    <div class="tools-strip-label">// works with every interview platform</div>
+    <div class="tools-row">
+      <div class="tool-chip">Zoom</div>
+      <div class="tool-chip">Google Meet</div>
+      <div class="tool-chip">Microsoft Teams</div>
+      <div class="tool-chip">HackerRank</div>
+      <div class="tool-chip">Codility</div>
+      <div class="tool-chip">TestGorilla</div>
+      <div class="tool-chip">Webex</div>
+      <div class="tool-chip">OBS Studio</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 01</span> &nbsp;Features</div>
+    <h2>Built for every<br/>interview format.</h2>
+    <p class="section-sub">From behavioral rounds to live coding screens — Clue has a mode, an answer, and a capability for every moment.</p>
+
+    <div class="features-grid">
+      <div class="feat fade-up">
+        <div class="feat-icon accent">TX</div>
+        <h3>Real-Time Transcription</h3>
+        <p>Captures both your voice and the interviewer's — transcribed live, word by word, with zero perceptible lag. No recordings uploaded. Processed locally.</p>
+        <span class="feat-tag ft-green">Live · Zero Lag</span>
+      </div>
+      <div class="feat fade-up fade-up-d1">
+        <div class="feat-icon accent">AI</div>
+        <h3>Instant AI Answers</h3>
+        <p>The moment a question is detected, Clue generates a tailored, structured answer based on your resume, job description, and target role — automatic.</p>
+        <span class="feat-tag ft-accent">Context-Aware</span>
+      </div>
+      <div class="feat fade-up fade-up-d2">
+        <div class="feat-icon">ST</div>
+        <h3>Stealth Mode</h3>
+        <p>The app window disappears from Zoom, Teams, Meet, and OBS. Fully visible on your display. Completely invisible in any screen share or recording.</p>
+        <span class="feat-tag ft-muted">Screen-Share Proof</span>
+      </div>
+      <div class="feat fade-up">
+        <div class="feat-icon">SC</div>
+        <h3>Screenshot Analysis</h3>
+        <p>Select any screen region — a LeetCode problem, an MCQ, a diagram — and Clue reads and solves it in seconds with the right approach and complexity.</p>
+        <span class="feat-tag ft-amber">Vision AI</span>
+      </div>
+      <div class="feat fade-up fade-up-d1">
+        <div class="feat-icon">MK</div>
+        <h3>Mock Interview Practice</h3>
+        <p>AI interviewer. Real scoring. Behavioral, Technical, System Design, Coding, or Mixed modes. Full feedback and model answers after each session.</p>
+        <span class="feat-tag ft-red">AI Scored</span>
+      </div>
+      <div class="feat fade-up fade-up-d2">
+        <div class="feat-icon accent">HS</div>
+        <h3>Hot-Swap Mid-Session</h3>
+        <p>Switch transcription modes and AI engines during a live interview — zero restarts, zero interruptions. Mode and engine changes take effect immediately.</p>
+        <span class="feat-tag ft-accent">Live Switch</span>
+      </div>
+    </div>
+
+    <!-- PRIVACY BLOCK -->
+    <div class="privacy-block">
+      <div class="priv-card fade-up">
+        <div class="priv-num">// 01 PRIVACY</div>
+        <h4>Zero Audio Storage</h4>
+        <p>Your audio is processed in real time and never stored on our servers. No recordings. No uploads. Everything stays on your device.</p>
+        <span class="priv-badge">&nbsp;Verified Local</span>
+      </div>
+      <div class="priv-card fade-up fade-up-d1">
+        <div class="priv-num">// 02 PROCESSING</div>
+        <h4>Local Processing First</h4>
+        <p>Transcription and context analysis happen on-device. Only the text prompt hits our AI layer — your voice never leaves your machine.</p>
+        <span class="priv-badge">&nbsp;On-Device STT</span>
+      </div>
+      <div class="priv-card fade-up fade-up-d2">
+        <div class="priv-num">// 03 DATA</div>
+        <h4>No Data Sold. Ever.</h4>
+        <p>We store session duration for billing only — never your conversation content. We do not sell, share, or train AI on your interviews.</p>
+        <span class="priv-badge">&nbsp;Privacy-First</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODES -->
+<section id="modes" class="bg-alt">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 02</span> &nbsp;Transcription Modes</div>
+    <h2>Three modes.<br/>Switch mid-interview.</h2>
+    <p class="section-sub">Pick the mode that fits the moment — or hot-swap on the fly. No restart required.</p>
+    <div class="modes-grid">
+      <div class="mode-card mc-pulse fade-up">
+        <div class="mode-id">mode-01</div>
+        <div class="mode-name">Pulse</div>
+        <span class="mode-type mt-green">Real-Time Streaming</span>
+        <p class="mode-desc">Words appear as you speak — ultra-low latency, word by word. Best for HR and behavioral rounds where you need answers the moment a question lands.</p>
+      </div>
+      <div class="mode-card mc-echo fade-up fade-up-d1">
+        <div class="mode-id">mode-02</div>
+        <div class="mode-name">Echo</div>
+        <span class="mode-type mt-amber">High-Accuracy Batch</span>
+        <p class="mode-desc">Waits for a natural pause and delivers a precise, complete transcript. Perfect for technical rounds where accuracy matters more than speed.</p>
+      </div>
+      <div class="mode-card mc-fusion fade-up fade-up-d2">
+        <div class="mode-id">mode-03</div>
+        <div class="mode-name">Fusion</div>
+        <span class="mode-type mt-accent">Best of Both</span>
+        <p class="mode-desc">Live preview while speaking, upgraded to an accurate committed transcript on pause. Ideal for complex discussions where every word in the answer counts.</p>
+      </div>
+    </div>
+    <div class="modes-note fade-up">
+      All modes work with both <strong>Clue AI</strong> and <strong>Clue Pro</strong> engines. Switch engines or modes mid-session with a single click — no restart needed.
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 03</span> &nbsp;How It Works</div>
+    <h2>Interview-ready<br/>in under 5 minutes.</h2>
+    <p class="section-sub">No API keys. No complicated setup. Open the app, add your context, and Clue handles everything.</p>
+    <div class="steps-grid">
+      <div class="steps-line"></div>
+      <div class="step fade-up">
+        <div class="step-num">01</div>
+        <h3>Add your context</h3>
+        <p>Paste your resume, job description, and prep notes. Clue uses this to personalise every answer it generates.</p>
+      </div>
+      <div class="step fade-up fade-up-d1">
+        <div class="step-num">02</div>
+        <h3>Start your session</h3>
+        <p>Click Start. Clue captures your mic and system audio simultaneously — hearing both you and the interviewer.</p>
+      </div>
+      <div class="step fade-up fade-up-d2">
+        <div class="step-num">03</div>
+        <h3>Get instant answers</h3>
+        <p>Questions are auto-detected and answered in seconds. Screenshot capture handles coding and visual questions.</p>
+      </div>
+      <div class="step fade-up fade-up-d3">
+        <div class="step-num">04</div>
+        <h3>Stay invisible</h3>
+        <p>Enable Stealth Mode — Clue vanishes from screen share while staying fully visible to you. Your screen only.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM -->
+<section class="bg-alt">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 04</span> &nbsp;Platform</div>
+    <h2>Wherever you interview.</h2>
+    <p class="section-sub">Native desktop apps for macOS and Windows. Mobile sync in active development.</p>
+    <div class="platform-grid">
+      <div class="plat-card fade-up">
+        <div class="plat-name-row">
+          <div class="plat-name">macOS</div>
+          <span class="plat-badge pb-green">Available</span>
+        </div>
+        <p>Native app for Apple Silicon and Intel Macs. Full system audio capture, stealth mode, and screenshot analysis — optimised for macOS 12+.</p>
+      </div>
+      <div class="plat-card fade-up fade-up-d1">
+        <div class="plat-name-row">
+          <div class="plat-name">Windows</div>
+          <span class="plat-badge pb-green">Available</span>
+        </div>
+        <p>Full-featured app for Windows 10 and 11. All core capabilities — transcription, stealth mode, AI answers, screenshot analysis — work natively.</p>
+      </div>
+      <div class="plat-card fade-up fade-up-d2" style="border-color:rgba(240,160,0,0.15);">
+        <div class="plat-name-row">
+          <div class="plat-name">Mobile Sync</div>
+          <span class="plat-badge pb-amber">Soon</span>
+        </div>
+        <p>Coming soon — AI answers sync to your phone in real time while your desktop runs the session. Hands-free and invisible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 05</span> &nbsp;Comparison</div>
+    <h2>Why candidates<br/>choose Clue.</h2>
+    <p class="section-sub">We looked at every competitor so you don't have to. Here's how Clue stacks up.</p>
+    <div class="compare-wrap fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="th-us">
+              <div class="th-logo">
+                <img src="logo2.png" alt="Clue"/>
+                Clue ✦
+              </div>
+            </th>
+            <th>Alternative A</th>
+            <th>Alternative B</th>
+            <th>Alternative C</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Starting price</td>
+            <td class="td-us td-price best">₹299 one-time</td>
+            <td class="td-price">$25/mo</td>
+            <td class="td-price">$29/mo</td>
+            <td class="td-price">$10/mo</td>
+          </tr>
+          <tr>
+            <td>Real-time live answers</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Stealth mode</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Screenshot / vision AI</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Mock interview practice</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Hot-swap modes mid-session</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Pay-per-use (no subscription)</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Audio stored on servers</td>
+            <td class="td-us" style="color:var(--accent);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px;">Never</td>
+            <td><span class="partial">Unclear</span></td>
+            <td><span class="partial">Yes ⚠</span></td>
+            <td><span class="partial">Unclear</span></td>
+          </tr>
+          <tr>
+            <td>macOS + Windows</td>
+            <td class="td-us"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td>Transcription modes</td>
+            <td class="td-us" style="color:var(--accent);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px;">3 modes</td>
+            <td><span class="partial">1 mode</span></td>
+            <td><span class="partial">1 mode</span></td>
+            <td><span class="partial">1 mode</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin:12px 20px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Based on publicly available information as of April 2026. Verify at official sites.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 06</span> &nbsp;Download</div>
+    <h2>Native desktop app.<br/>Two platforms. One download.</h2>
+    <p class="section-sub">Free to install. Your first 20 minutes are on us — no card needed. Set up in under 2 minutes.</p>
+
+    <div class="dl-free-banner">
+      <div class="dfb-text">✦ <strong>Sign up and get 20 free minutes instantly.</strong> No credit card. No commitment. Just open the app and go.</div>
+      <a href="/account.html" class="dfb-link">Create Free Account →</a>
+    </div>
+
+    <div class="download-grid">
+      <div class="dl-card">
+        <div class="dl-platform">macOS · Apple Silicon</div>
+        <div class="dl-chip">M1 / M2 / M3 / M4 — ARM64</div>
+        <div class="dl-meta">
+          File: Clue-1.0.0-arm64.dmg<br/>
+          Size: ~90 MB<br/>
+          Requires: macOS 12 Monterey+
+        </div>
+        <a href="https://github.com/Basha9393/Clue-Releases/releases/download/v1.0.0/Clue-1.0.0-arm64.dmg" class="btn-download">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .dmg
+        </a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-platform">macOS · Intel</div>
+        <div class="dl-chip">Core i5 / i7 / i9 / Xeon — x86_64</div>
+        <div class="dl-meta">
+          File: Clue-1.0.0.dmg<br/>
+          Size: ~141 MB<br/>
+          Requires: macOS 12 Monterey+
+        </div>
+        <a href="https://github.com/Basha9393/Clue-Releases/releases/download/v1.0.0/Clue-1.0.0.dmg" class="btn-download ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .dmg
+        </a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-platform">Windows 10 / 11</div>
+        <div class="dl-chip">64-bit · x86_64 Installer</div>
+        <div class="dl-meta">
+          File: Clue Setup 1.0.0.exe<br/>
+          Size: ~105 MB<br/>
+          Requires: Windows 10 build 19041+
+        </div>
+        <a href="https://github.com/Basha9393/Clue-Releases/releases/download/v1.0.0/Clue.Setup.1.0.0.exe" class="btn-download ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .exe
+        </a>
+        <div class="dl-alt"><a href="https://github.com/Basha9393/Clue-Releases/releases/download/v1.0.0/Clue.1.0.0.exe">Also: portable .exe (no install)</a></div>
+      </div>
+    </div>
+    <div class="dl-sysreq">
+      <strong style="color:var(--text2)">System requirements:</strong> &nbsp;macOS 12 Monterey or later &nbsp;·&nbsp; Windows 10 (build 19041) or later &nbsp;·&nbsp; 4 GB RAM minimum &nbsp;·&nbsp; Microphone or system audio &nbsp;·&nbsp; Internet connection for AI features
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="bg-alt">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 06</span> &nbsp;Pricing</div>
+    <h2>Honest pricing.<br/>No surprises.</h2>
+    <p class="section-sub">Start with a pack. No subscription required. Packs never expire — use them at your own pace.</p>
+
+    <div class="pricing-section-label">∞ Unlimited Subscriptions</div>
+    <div class="subs-grid">
+      <div class="plan-card fade-up">
+        <div class="plan-chip chip-muted">Sprint</div>
+        <div class="plan-name">Weekly</div>
+        <div class="plan-desc">unlimited · 7 days</div>
+        <div class="plan-price"><sup>₹</sup>469<span class="per">/wk</span></div>
+        <div class="plan-mins"><span class="inf">∞</span> <strong>Unlimited</strong> minutes</div>
+        <button class="btn-plan" onclick="handlePlanClick('weekly',469,'Weekly Plan')">Get This Plan</button>
+      </div>
+      <div class="plan-card featured fade-up fade-up-d1">
+        <div class="plan-chip chip-accent">Popular</div>
+        <div class="plan-name">Monthly</div>
+        <div class="plan-desc">unlimited · 30 days</div>
+        <div class="plan-price"><sup>₹</sup>2,040<span class="per">/mo</span></div>
+        <div class="plan-mins"><span class="inf">∞</span> <strong>Unlimited</strong> minutes</div>
+        <button class="btn-plan featured-btn" onclick="handlePlanClick('monthly',2040,'Monthly Plan')">Get This Plan</button>
+      </div>
+      <div class="plan-card fade-up fade-up-d2">
+        <div class="plan-chip chip-muted">Best Value</div>
+        <div class="plan-name">Quarterly</div>
+        <div class="plan-desc">unlimited · 90 days</div>
+        <div class="plan-price"><sup>₹</sup>5,550<span class="per">/qtr</span></div>
+        <div class="plan-mins"><span class="inf">∞</span> <strong>Unlimited</strong> minutes</div>
+        <button class="btn-plan" onclick="handlePlanClick('quarterly',5550,'Quarterly Plan')">Get This Plan</button>
+      </div>
+    </div>
+
+    <div class="pricing-section-label" style="margin-top:48px;">Minute Packs — One-Time. Never Expire.</div>
+    <div class="packs-grid">
+      <div class="plan-card fade-up">
+        <div class="plan-name">Starter</div>
+        <div class="plan-desc">try clue · zero commitment</div>
+        <div class="plan-price"><sup>₹</sup>299</div>
+        <div class="plan-mins"><strong>45 minutes</strong></div>
+        <button class="btn-plan" onclick="handlePlanClick('pack-starter',299,'Starter Pack')">Get This Pack</button>
+      </div>
+      <div class="plan-card fade-up fade-up-d1">
+        <div class="plan-name">Standard</div>
+        <div class="plan-desc">focused prep sprint</div>
+        <div class="plan-price"><sup>₹</sup>699</div>
+        <div class="plan-mins"><strong>150 minutes</strong></div>
+        <button class="btn-plan" onclick="handlePlanClick('pack-standard',699,'Standard Pack')">Get This Pack</button>
+      </div>
+      <div class="plan-card fade-up fade-up-d2">
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">serious interview seasons</div>
+        <div class="plan-price"><sup>₹</sup>1,399</div>
+        <div class="plan-mins"><strong>400 minutes</strong></div>
+        <button class="btn-plan" onclick="handlePlanClick('pack-pro',1399,'Pro Pack')">Get This Pack</button>
+      </div>
+      <div class="plan-card fade-up fade-up-d3">
+        <div class="plan-chip chip-accent">Best Value</div>
+        <div class="plan-name">Power</div>
+        <div class="plan-desc">maximum prep · maximum results</div>
+        <div class="plan-price"><sup>₹</sup>2,799</div>
+        <div class="plan-mins"><strong>1,000 minutes</strong></div>
+        <button class="btn-plan" onclick="handlePlanClick('pack-power',2799,'Power Pack')">Get This Pack</button>
+      </div>
+    </div>
+    <p class="pricing-note">
+      ✦ All new accounts start with <strong style="color:var(--accent)">20 free minutes</strong> — no card required &nbsp;·&nbsp; Secure payments via Razorpay &nbsp;·&nbsp; Plans activate instantly
+    </p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="reviews">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 07</span> &nbsp;Reviews</div>
+    <h2>Real candidates.<br/>Real results.</h2>
+    <p class="section-sub">From Chennai to Kochi — candidates across India walk into interviews differently now.</p>
+    <div class="tgrid">
+      <div class="tcard fade-up">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">I had three back-to-back interviews — TCS, Infosys, and a startup — all in the same week. Clue kept me sharp across all of them. The behavioral answers it generates are better structured than what I'd come up with under pressure. Got all three offers.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">AK</div>
+          <div>
+            <div class="tcard-name">Arjun Krishnamurthy</div>
+            <div class="tcard-role">Software Engineer · Chennai, TN</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up fade-up-d1">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">System design was always my weak spot. Clue breaks answers down in real time — structured, clear, in the exact format interviewers want. Cleared Zoho's final round on my first attempt after using this.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">PN</div>
+          <div>
+            <div class="tcard-name">Priya Nair</div>
+            <div class="tcard-role">Product Manager · Kochi, Kerala</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up fade-up-d2">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">The screenshot feature is insane — I captured a LeetCode-style problem mid-interview and got the full approach, edge cases, and complexity in seconds. Stealth mode worked perfectly. Joining the Hyderabad office next month.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">RT</div>
+          <div>
+            <div class="tcard-name">Ravi Teja Reddy</div>
+            <div class="tcard-role">Full Stack Dev · Hyderabad, AP</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">I used the 20 free minutes right before my Google interview and was hooked. The STAR-format answers for behavioral questions were so tight, the hiring manager actually asked me to slow down because my answer was "too complete." Got the offer.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">RT</div>
+          <div>
+            <div class="tcard-name">Riya T.</div>
+            <div class="tcard-role">SDE · Google, Bangalore</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up fade-up-d1">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">I tested the stealth mode on a recording before my actual interview. Completely invisible — not even a ghost frame. That test gave me enormous confidence. Walked in calm, walked out with the offer. Flipkart PM role, starting next month.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">KB</div>
+          <div>
+            <div class="tcard-name">Karan B.</div>
+            <div class="tcard-role">Product Manager · Flipkart, Bangalore</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">As a fresher from a tier-2 college I always felt at a disadvantage against IIT/NIT candidates. Clue levelled the playing field completely. Used the mock interview feature for 50+ practice questions before my Wipro interview. Got through. Life-changing.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">MS</div>
+          <div>
+            <div class="tcard-name">Meenakshi Sundaram</div>
+            <div class="tcard-role">Data Analyst · Madurai, TN</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up fade-up-d1">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">I tried other tools — too expensive, too complicated. Clue is simple, works instantly, and the starter pack was enough to trust it before committing. Now on the monthly plan. It paid for itself with the salary bump alone.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">KB</div>
+          <div>
+            <div class="tcard-name">Karthik Balaji</div>
+            <div class="tcard-role">DevOps Engineer · Coimbatore, TN</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard fade-up fade-up-d2">
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">Pulse mode is incredible for HR rounds — answers appear before I even finish the question. I switched to Fusion for technical rounds where I needed accuracy. The fact that it never stores my audio made me trust it completely.</p>
+        <div class="tcard-author">
+          <div class="tcard-av">SV</div>
+          <div>
+            <div class="tcard-name">Sneha Vijayaraghavan</div>
+            <div class="tcard-role">UI/UX Designer · Trivandrum, Kerala</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="bg-alt">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 08</span> &nbsp;FAQ</div>
+    <h2>Everything you<br/>need to know.</h2>
+    <p class="section-sub">Can't find your answer? <a href="mailto:support@cluehire.com" style="color:var(--accent);">Email us</a> or <a href="https://wa.me/917358929639" style="color:var(--accent);">WhatsApp us</a> — we reply fast.</p>
+    <div class="faq-wrap">
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Is Clue invisible to interviewers? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Yes. Clue's Stealth Mode uses OS-level content protection to hide the window from Zoom, Google Meet, Microsoft Teams, and OBS. The app stays fully visible on your screen while being completely invisible in any screen share or recording.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Is my audio or interview content stored? <span class="faq-icon">+</span></button>
+        <div class="faq-body">No. Audio is processed in real time for transcription only and is never stored on our servers. Your conversation stays on your device. We only store session duration for billing — never the content.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">What interview formats does Clue support? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Clue works across all major formats: behavioral (HR, STAR), technical (concepts, architecture), system design, coding problems (screenshot capture), and mixed rounds. Non-tech roles too — sales, product, finance, consulting.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Can Clue hear the interviewer's voice too? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Yes. With system audio capture enabled, Clue captures both your microphone and the interviewer's audio through your speakers or headphones simultaneously. On macOS, a virtual audio driver may be needed for full system audio capture.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Do minute packs expire? <span class="faq-icon">+</span></button>
+        <div class="faq-body">No. Minute packs never expire. Buy once, use whenever — across weeks or months. Subscription plans give unlimited minutes for their stated duration and don't deduct from your pack balance while active.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">How do I buy a plan? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Email <a href="mailto:support@cluehire.com" style="color:var(--accent);">support@cluehire.com</a> or WhatsApp <a href="https://wa.me/917358929639" style="color:var(--accent);">+91 73589 29639</a> with the plan you want. We'll send payment details and activate your account within hours.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">What are Pulse, Echo, and Fusion modes? <span class="faq-icon">+</span></button>
+        <div class="faq-body"><b>Pulse</b> — real-time streaming, word by word, ultra-low latency. <b>Echo</b> — waits for a pause, delivers a high-accuracy batch transcript. <b>Fusion</b> — live preview while speaking, replaced by an accurate transcript on pause. All three hot-swappable mid-session.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Does Clue work on Windows and macOS? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Yes. Native desktop apps for macOS (Apple Silicon + Intel) and Windows 10/11. Mobile sync — showing AI answers on your phone in real time — is in active development.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="faq(this)">Is it ethical to use Clue in interviews? <span class="faq-icon">+</span></button>
+        <div class="faq-body">Clue is designed as a preparation and cognitive aid tool. Using any personal tool during an interview is your own responsibility — review the policies of the platform or employer you're interviewing with. Many candidates use Clue purely for mock interviews and practice, which is always fully permitted. Read our <a href="aup.html" style="color:var(--accent);">Acceptable Use Policy</a> for full details.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="sec-label"><span class="idx">// 09</span> &nbsp;Contact</div>
+    <h2>Let's talk.</h2>
+    <p class="section-sub" style="margin-bottom:48px;">A question about plans, features, or anything else? We're a small team and we reply fast.</p>
+    <div class="contact-grid">
+      <div class="contact-info fade-up">
+        <h3>Get in touch</h3>
+        <p>We're based in Chennai, India. Whether you want to ask about a plan, report a bug, or just say hello — drop us a line. We typically reply within a few hours.</p>
+        <div class="contact-links">
+          <a href="mailto:support@cluehire.com" class="clink">
+            <div>
+              <div class="clink-label">General Support</div>
+              <div class="clink-value">support@cluehire.com</div>
+            </div>
+          </a>
+          <a href="https://wa.me/917358929639" target="_blank" class="clink">
+            <div>
+              <div class="clink-label">WhatsApp</div>
+              <div class="clink-value">+91 73589 29639</div>
+            </div>
+          </a>
+          <a href="mailto:shah@cluehire.com" class="clink">
+            <div>
+              <div class="clink-label">Shah — Founder</div>
+              <div class="clink-value">shah@cluehire.com</div>
+            </div>
+          </a>
+          <a href="mailto:jeba@cluehire.com" class="clink">
+            <div>
+              <div class="clink-label">Jeba — Co-founder</div>
+              <div class="clink-value">jeba@cluehire.com</div>
+            </div>
+          </a>
+          <div class="clink" style="cursor:default;">
+            <div>
+              <div class="clink-label">Location</div>
+              <div class="clink-value">Chennai, Tamil Nadu, India</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form fade-up fade-up-d1">
+        <h4>Send us a message</h4>
+        <p>Fill this in and we'll email you back.</p>
+        <div id="contact-signin-prompt" style="display:none;padding:18px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:4px;text-align:center;margin-bottom:14px">
+          <p style="color:var(--text2);font-size:13px;margin-bottom:10px">Sign in to send a message</p>
+          <a href="/account.html" style="display:inline-block;background:var(--accent);color:#090909;font-size:12px;font-weight:800;padding:8px 18px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;">Sign In →</a>
+        </div>
+        <form onsubmit="sendMail(event)" id="contact-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Your Name</label>
+              <input type="text" id="fname" placeholder="Arjun Krishnamurthy" required/>
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <input type="email" id="femail" placeholder="you@example.com" required/>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Subject</label>
+            <select id="fsubject">
+              <option value="Plan Purchase">I want to buy a plan</option>
+              <option value="Technical Support">Technical support</option>
+              <option value="General Question">General question</option>
+              <option value="Partnership">Partnership / B2B</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Message</label>
+            <textarea id="fmessage" rows="4" placeholder="Tell us what you need..." required></textarea>
+          </div>
+          <button type="submit" class="btn-send">Send Message →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="cta-section">
+  <div class="container">
+    <div class="sec-label" style="justify-content:center;"><span class="idx">// start</span></div>
+    <h2>Your next interview<br/>starts with Clue.</h2>
+    <p>Sign up, get 20 free minutes instantly — no card required. Feel what it's like to walk into an interview with the right answer ready before you even open your mouth.</p>
+    <div class="cta-actions">
+      <a href="/account.html" class="btn-primary" style="font-size:15px;padding:15px 36px;">Start Free — 20 Min Included →</a>
+      <a href="#download" class="btn-outline" style="font-size:15px;padding:15px 36px;">Download App ↓</a>
+    </div>
+    <p class="cta-note">macOS · Windows · 20 free minutes · No card · Plans from ₹299</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="logo" href="#">
+        <img src="logo2.png" alt="Clue" style="width:24px;height:24px;border-radius:5px;"/>
+        <span class="logo-text">Clue<span class="logo-dot">.</span></span>
+      </a>
+      <p>AI-powered interview copilot for job seekers who want to walk in prepared, confident, and sharp. Made with care in Chennai, India.</p>
+      <div class="footer-socials">
+        <a href="https://twitter.com/cluehire" target="_blank" class="soc" title="X / Twitter">𝕏</a>
+        <a href="https://instagram.com/clue_hire" target="_blank" class="soc" title="Instagram">ig</a>
+        <a href="https://linkedin.com/in/clue-hire-5055b8401" target="_blank" class="soc" title="LinkedIn" style="font-weight:900;">in</a>
+        <a href="https://wa.me/917358929639" target="_blank" class="soc" title="WhatsApp">wa</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#modes">Transcription Modes</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#compare">Comparison</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="aup.html">Acceptable Use</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:support@cluehire.com">support@cluehire.com</a>
+      <a href="mailto:shah@cluehire.com">shah@cluehire.com</a>
+      <a href="mailto:jeba@cluehire.com">jeba@cluehire.com</a>
+      <a href="https://wa.me/917358929639">+91 73589 29639</a>
+      <a href="#">Chennai, Tamil Nadu, India</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 ClueHire. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="aup.html">AUP</a>
+      <a href="mailto:support@cluehire.com">Support</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ── FAQ ── */
+  function faq(btn) { btn.closest('.faq-item').classList.toggle('open'); }
+
+  /* ── CONTACT FORM ── */
+  function sendMail(e) {
+    e.preventDefault();
+    const name = document.getElementById('fname').value;
+    const email = document.getElementById('femail').value;
+    const subject = document.getElementById('fsubject').value;
+    const msg = document.getElementById('fmessage').value;
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
+    window.location.href = `mailto:support@cluehire.com?subject=${encodeURIComponent(subject + ' — Clue')}&body=${body}`;
+  }
+
+  /* ── HAMBURGER ── */
+  function toggleMenu() {
+    document.getElementById('hamburger').classList.toggle('open');
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('hamburger').classList.remove('open');
+    document.getElementById('mobileMenu').classList.remove('open');
+  }
+
+  /* ── STICKY CTA ── */
+  let stickyClosed = false;
+  const stickyCta = document.getElementById('stickyCta');
+  function dismissSticky() { stickyClosed = true; stickyCta.classList.remove('visible'); }
+
+  /* ── SCROLL EVENTS ── */
+  const scrollTopBtn = document.getElementById('scrollTop');
+  const nav = document.getElementById('mainNav');
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    scrollTopBtn.classList.toggle('visible', y > 400);
+    if (!stickyClosed) stickyCta.classList.toggle('visible', y > window.innerHeight * 0.8);
+    nav.classList.toggle('scrolled', y > 20);
+  }, { passive: true });
+
+  /* ── FADE-UP ON SCROLL ── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+  /* ── ACTIVE NAV ── */
+  const sections = document.querySelectorAll('section[id], div[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+  }, { passive: true });
+
+  /* ── TYPING ANIMATION ── */
+  const typed = "Tell me about a time you led a cross-functional team under a tight deadline.";
+  let i = 0;
+  const el = document.getElementById('txText1');
+  function type() {
+    if (!el) return;
+    if (i <= typed.length) {
+      el.textContent = typed.slice(0, i++);
+      setTimeout(type, i < typed.length ? 36 : 2000);
+    } else { i = 0; setTimeout(type, 3000); }
+  }
+  setTimeout(type, 1000);
+
+  /* ── PLAN BUTTON HANDLER ── */
+  window.handlePlanClick = function(planId, priceInr, name) {
+    if (!window._clueUser) { window.location.href = '/account.html'; return; }
+    const btn = event.currentTarget;
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Opening...';
+    fetch('https://us-central1-clue-app-c1710.cloudfunctions.net/createPaymentLink', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: window._clueUser.uid, planId, amountPaise: priceInr * 100, description: 'Clue - ' + name }),
+    })
+    .then(r => r.json())
+    .then(d => { if (d.url) window.open(d.url, '_blank'); else throw new Error(); })
+    .catch(() => alert('Could not create payment link. Please try again.'))
+    .finally(() => { btn.disabled = false; btn.textContent = orig; });
+  };
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+
+const auth = getAuth(initializeApp({
+  apiKey: 'AIzaSyCqfJaMr-pb5hMqfmx7x5HdU__ljQ0CuBs',
+  authDomain: 'clue-app-c1710.firebaseapp.com',
+  projectId: 'clue-app-c1710',
+  storageBucket: 'clue-app-c1710.firebasestorage.app',
+  messagingSenderId: '598708403650',
+  appId: '1:598708403650:web:e59ae2bf9c7457edca6a5b',
+}));
+
+onAuthStateChanged(auth, (user) => {
+  window._clueUser = user;
+  const signinBtn   = document.getElementById('nav-signin');
+  const avatarEl    = document.getElementById('nav-avatar');
+  const contactForm = document.getElementById('contact-form');
+  const contactPrompt = document.getElementById('contact-signin-prompt');
+
+  if (user) {
+    signinBtn.style.display = 'none';
+    avatarEl.style.display = 'flex';
+    if (user.photoURL) {
+      avatarEl.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover"/>`;
+    } else {
+      Object.assign(avatarEl.style, { background: 'var(--accent)', alignItems: 'center', justifyContent: 'center', color: '#090909', fontWeight: '800', fontSize: '13px' });
+      avatarEl.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+    }
+    if (contactForm) contactForm.style.display = 'block';
+    if (contactPrompt) contactPrompt.style.display = 'none';
+  } else {
+    signinBtn.style.display = 'inline-flex';
+    avatarEl.style.display = 'none';
+    if (contactForm) contactForm.style.display = 'none';
+    if (contactPrompt) contactPrompt.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>
