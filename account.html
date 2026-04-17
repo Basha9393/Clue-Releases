@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Account — Clue</title>
+  <link rel="icon" href="logo2.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #030305;
+      --bg2:      #09090f;
+      --bg3:      #0f0f18;
+      --border:   rgba(255,255,255,0.055);
+      --border2:  rgba(255,255,255,0.1);
+      --text:     #eeeef5;
+      --muted:    #5e5e78;
+      --muted2:   #8888a8;
+      --blue:     #3b82f6;
+      --blue2:    #2563eb;
+      --green:    #4ade80;
+      --amber:    #fbbf24;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Nav ── */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 64px; display: flex; align-items: center; justify-content: space-between; background: rgba(3,3,5,0.9); border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: -0.4px; }
+    .nav-logo img { width: 28px; height: 28px; border-radius: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .btn-ghost { font-size: 13px; font-weight: 600; color: var(--muted2); padding: 7px 14px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; background: none; transition: all .15s; }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-primary { font-size: 13px; font-weight: 700; color: #fff; padding: 8px 18px; border-radius: 10px; background: var(--blue); border: none; cursor: pointer; transition: all .15s; }
+    .btn-primary:hover { background: var(--blue2); }
+    .btn-primary:disabled { opacity: .5; cursor: wait; }
+
+    /* ── Page layout ── */
+    .page { padding-top: 100px; padding-bottom: 80px; max-width: 760px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+
+    /* ── Auth card ── */
+    #auth-section { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 32px; }
+    .auth-card { width: 100%; max-width: 400px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; padding: 36px 32px; display: flex; flex-direction: column; gap: 20px; }
+    .auth-card h2 { font-size: 20px; font-weight: 800; text-align: center; letter-spacing: -0.4px; }
+    .auth-card p { font-size: 13px; color: var(--muted2); text-align: center; }
+    .divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-group label { font-size: 12px; font-weight: 600; color: var(--muted2); }
+    .input-group input { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s; }
+    .input-group input:focus { border-color: var(--blue); }
+    .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 11px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; font-family: inherit; }
+    .btn-google:hover { border-color: var(--blue); background: rgba(59,130,246,0.08); }
+    .btn-full { width: 100%; padding: 11px; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .15s; border: none; }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-blue:hover { background: var(--blue2); }
+    .btn-blue:disabled { opacity: .5; cursor: wait; }
+    .link-btn { background: none; border: none; color: var(--blue); font-size: 13px; cursor: pointer; font-family: inherit; padding: 0; }
+    .link-btn:hover { text-decoration: underline; }
+    .error-msg { color: #f87171; font-size: 12px; text-align: center; display: none; }
+    .error-msg.show { display: block; }
+
+    /* ── Account section ── */
+    #account-section { display: none; flex-direction: column; gap: 32px; }
+    .account-header { display: flex; align-items: center; justify-content: space-between; }
+    .account-user { display: flex; align-items: center; gap: 14px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .account-user-info h3 { font-size: 16px; font-weight: 700; }
+    .account-user-info p { font-size: 13px; color: var(--muted2); }
+
+    /* Status card */
+    .status-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 20px; }
+    .status-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .status-icon.unlimited { background: rgba(74,222,128,0.12); }
+    .status-icon.minutes { background: rgba(59,130,246,0.12); }
+    .status-icon.empty { background: rgba(248,113,113,0.1); }
+    .status-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .status-info p { font-size: 13px; color: var(--muted2); }
+    .status-badge { margin-left: auto; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+    .badge-green { background: rgba(74,222,128,0.12); color: var(--green); }
+    .badge-blue { background: rgba(59,130,246,0.12); color: var(--blue); }
+    .badge-red { background: rgba(248,113,113,0.1); color: #f87171; }
+
+    /* Plans */
+    .section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+    .plans-grid { display: grid; gap: 12px; }
+    .plans-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+    .plans-grid.cols2 { grid-template-columns: repeat(2, 1fr); }
+    .plan-card { position: relative; background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: border-color .15s; }
+    .plan-card:hover { border-color: rgba(59,130,246,0.3); }
+    .plan-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .plan-name { font-size: 14px; font-weight: 700; margin-top: 4px; }
+    .plan-desc { font-size: 11px; color: var(--muted2); }
+    .plan-price { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; }
+    .plan-price .amount { font-size: 22px; font-weight: 900; }
+    .plan-price .period { font-size: 12px; color: var(--muted2); }
+    .plan-feature { font-size: 11px; color: var(--green); font-weight: 600; }
+    .btn-plan { margin-top: auto; padding-top: 8px; width: 100%; padding: 9px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; border: none; font-family: inherit; }
+    .btn-plan-primary { background: var(--blue); color: #fff; }
+    .btn-plan-primary:hover { background: var(--blue2); }
+    .btn-plan-secondary { background: var(--bg3); color: var(--muted2); border: 1px solid var(--border2); }
+    .btn-plan-secondary:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .btn-plan:disabled { opacity: .5; cursor: wait; }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .plans-grid.cols3 { grid-template-columns: 1fr; }
+      .plans-grid.cols2 { grid-template-columns: 1fr; }
+      .status-card { flex-wrap: wrap; }
+      .status-badge { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="logo2.png" alt="Clue"/>
+    Clue
+  </a>
+  <div class="nav-right">
+    <a href="/" class="btn-ghost">Home</a>
+    <button class="btn-ghost" id="signout-btn" style="display:none" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ── Auth section ── -->
+  <div id="auth-section">
+    <div class="auth-card">
+      <div style="text-align:center">
+        <div style="display:inline-flex;background:#2563eb;border-radius:14px;padding:10px 12px;margin-bottom:12px">
+          <span style="font-size:24px">⚡</span>
+        </div>
+        <h2>Sign in to Clue</h2>
+        <p style="margin-top:6px">Manage your plan and account</p>
+      </div>
+
+      <button class="btn-google" onclick="handleGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <div id="email-form">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="email-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')handleEmailAuth()"/>
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleEmailAuth()"/>
+          </div>
+          <p class="error-msg" id="auth-error"></p>
+          <button class="btn-full btn-blue" id="email-btn" onclick="handleEmailAuth()">Sign in</button>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <button class="link-btn" onclick="toggleMode()">
+              <span id="toggle-label">Don't have an account? Sign up</span>
+            </button>
+            <button class="link-btn" onclick="handleReset()">Forgot password?</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Account section ── -->
+  <div id="account-section">
+
+    <!-- Header -->
+    <div class="account-header">
+      <div class="account-user">
+        <div class="avatar" id="user-avatar"></div>
+        <div class="account-user-info">
+          <h3 id="user-name">—</h3>
+          <p id="user-email">—</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current plan status -->
+    <div>
+      <p class="section-label" style="margin-bottom:12px">Current Plan</p>
+      <div class="status-card" id="status-card">
+        <div class="status-icon" id="status-icon">⏳</div>
+        <div class="status-info">
+          <h4 id="status-title">Loading...</h4>
+          <p id="status-desc"></p>
+        </div>
+        <span class="status-badge" id="status-badge"></span>
+      </div>
+    </div>
+
+    <!-- Subscriptions -->
+    <div>
+      <p class="section-label" style="margin-bottom:12px">Unlimited Subscriptions</p>
+      <div class="plans-grid cols3" id="sub-plans"></div>
+    </div>
+
+    <!-- Packs -->
+    <div>
+      <p class="section-label" style="margin-bottom:12px">Minute Packs (one-time)</p>
+      <div class="plans-grid cols2" id="pack-plans"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+
+const app = initializeApp({
+  apiKey:            'AIzaSyCqfJaMr-pb5hMqfmx7x5HdU__ljQ0CuBs',
+  authDomain:        'clue-app-c1710.firebaseapp.com',
+  projectId:         'clue-app-c1710',
+  storageBucket:     'clue-app-c1710.firebasestorage.app',
+  messagingSenderId: '598708403650',
+  appId:             '1:598708403650:web:e59ae2bf9c7457edca6a5b',
+});
+
+const auth = getAuth(app);
+const db   = getFirestore(app, 'clue-app1');
+
+const PLANS = [
+  { id: 'pack-starter',  name: 'Starter Pack',  type: 'pack', priceInr: 299,  minutes: 45,   desc: 'Great for trying out the app' },
+  { id: 'pack-standard', name: 'Standard Pack', type: 'pack', priceInr: 699,  minutes: 150,  desc: 'Ideal for occasional use' },
+  { id: 'pack-pro',      name: 'Pro Pack',       type: 'pack', priceInr: 1399, minutes: 400,  desc: 'For regular interview prep' },
+  { id: 'pack-power',    name: 'Power Pack',     type: 'pack', priceInr: 2799, minutes: 1000, desc: 'Best value for serious prep' },
+  { id: 'weekly',        name: 'Weekly',         type: 'sub',  priceInr: 469,  days: 7,       desc: 'Unlimited access for 7 days',  badge: 'Sprint' },
+  { id: 'monthly',       name: 'Monthly',        type: 'sub',  priceInr: 2040, days: 30,      desc: 'Unlimited access for 30 days', badge: 'Most Popular' },
+  { id: 'quarterly',     name: 'Quarterly',      type: 'sub',  priceInr: 5550, days: 90,      desc: 'Unlimited access for 90 days', badge: 'Best Value' },
+];
+
+const CREATE_PAYMENT_LINK = 'https://us-central1-clue-app-c1710.cloudfunctions.net/createPaymentLink';
+
+let isSignUp = false;
+let unsubProfile = null;
+
+// ── Expose handlers to window ──────────────────────────────────────────────
+window.handleGoogleSignIn = async () => {
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (e) { showError(e.message); }
+};
+
+window.handleEmailAuth = async () => {
+  const email = document.getElementById('email-input').value.trim();
+  const pass  = document.getElementById('password-input').value;
+  const btn   = document.getElementById('email-btn');
+  if (!email || !pass) { showError('Please enter email and password'); return; }
+  btn.disabled = true;
+  btn.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+  try {
+    if (isSignUp) {
+      await createUserWithEmailAndPassword(auth, email, pass);
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  } catch (e) {
+    showError(friendlyError(e.code));
+    btn.disabled = false;
+    btn.textContent = isSignUp ? 'Create account' : 'Sign in';
+  }
+};
+
+window.handleReset = async () => {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email) { showError('Enter your email address first'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showError('Password reset email sent!');
+  } catch (e) { showError(friendlyError(e.code)); }
+};
+
+window.toggleMode = () => {
+  isSignUp = !isSignUp;
+  document.getElementById('email-btn').textContent = isSignUp ? 'Create account' : 'Sign in';
+  document.getElementById('toggle-label').textContent = isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up";
+  showError('');
+};
+
+window.handleSignOut = () => signOut(auth);
+
+window.buyPlan = async (planId, btn) => {
+  const user = auth.currentUser;
+  if (!user) return;
+  const plan = PLANS.find(p => p.id === planId);
+  if (!plan) return;
+  btn.disabled = true;
+  btn.textContent = 'Opening...';
+  try {
+    const res = await fetch(CREATE_PAYMENT_LINK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: user.uid, planId: plan.id, amountPaise: plan.priceInr * 100, description: `Clue - ${plan.name}` }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    window.open(data.url, '_blank');
+  } catch (e) {
+    alert('Could not create payment link. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = plan.type === 'pack' ? 'Get This Pack' : 'Get This Plan';
+  }
+};
+
+// ── Auth state ─────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+  if (unsubProfile) { unsubProfile(); unsubProfile = null; }
+
+  if (user) {
+    showAccountSection(user);
+    document.getElementById('signout-btn').style.display = 'block';
+    unsubProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      renderStatus(snap.exists() ? snap.data() : null);
+    });
+  } else {
+    showAuthSection();
+    document.getElementById('signout-btn').style.display = 'none';
+    renderStatus(null);
+  }
+});
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function showAuthSection() {
+  document.getElementById('auth-section').style.display = 'flex';
+  document.getElementById('account-section').style.display = 'none';
+}
+
+function showAccountSection(user) {
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('account-section').style.display = 'flex';
+
+  document.getElementById('user-name').textContent  = user.displayName || 'User';
+  document.getElementById('user-email').textContent = user.email || '';
+
+  const avatar = document.getElementById('user-avatar');
+  if (user.photoURL) {
+    avatar.innerHTML = `<img src="${user.photoURL}" alt=""/>`;
+  } else {
+    avatar.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+  }
+
+  renderPlans();
+}
+
+function renderStatus(profile) {
+  const icon  = document.getElementById('status-icon');
+  const title = document.getElementById('status-title');
+  const desc  = document.getElementById('status-desc');
+  const badge = document.getElementById('status-badge');
+
+  if (!profile) {
+    icon.className  = 'status-icon empty';
+    icon.textContent = '⚡';
+    title.textContent = 'No active plan';
+    desc.textContent  = 'Purchase a plan below to get started';
+    badge.textContent = 'Inactive';
+    badge.className   = 'status-badge badge-red';
+    return;
+  }
+
+  const subActive = profile.subscriptionActive && profile.subscriptionExpiresAt &&
+    profile.subscriptionExpiresAt.toDate() > new Date();
+
+  if (subActive) {
+    const expires = profile.subscriptionExpiresAt.toDate();
+    const days = Math.ceil((expires - new Date()) / 86400000);
+    icon.className    = 'status-icon unlimited';
+    icon.textContent  = '∞';
+    title.textContent = `${capitalize(profile.subscriptionPlan)} — Unlimited`;
+    desc.textContent  = `Expires in ${days} day${days !== 1 ? 's' : ''} (${expires.toLocaleDateString()})`;
+    badge.textContent = 'Active';
+    badge.className   = 'status-badge badge-green';
+  } else {
+    const mins = profile.minutesBalance ?? 0;
+    icon.className    = mins > 0 ? 'status-icon minutes' : 'status-icon empty';
+    icon.textContent  = mins > 0 ? '⏱' : '⚡';
+    title.textContent = `${mins} minute${mins !== 1 ? 's' : ''} remaining`;
+    desc.textContent  = mins > 0 ? 'Top up with a minute pack anytime' : 'Purchase a plan to get started';
+    badge.textContent = mins > 0 ? 'Pay-as-you-go' : 'No credits';
+    badge.className   = `status-badge ${mins > 0 ? 'badge-blue' : 'badge-red'}`;
+  }
+}
+
+function renderPlans() {
+  const subs  = PLANS.filter(p => p.type === 'sub');
+  const packs = PLANS.filter(p => p.type === 'pack');
+
+  document.getElementById('sub-plans').innerHTML = subs.map(p => `
+    <div class="plan-card">
+      ${p.badge ? `<span class="plan-badge">${p.badge}</span>` : ''}
+      <p class="plan-name">${p.name}</p>
+      <p class="plan-desc">${p.desc}</p>
+      <div class="plan-price">
+        <span class="amount">₹${p.priceInr}</span>
+        <span class="period">/${p.days}d</span>
+      </div>
+      <p class="plan-feature">∞ Unlimited minutes</p>
+      <button class="btn-plan btn-plan-primary" onclick="buyPlan('${p.id}', this)">Get This Plan</button>
+    </div>
+  `).join('');
+
+  document.getElementById('pack-plans').innerHTML = packs.map(p => `
+    <div class="plan-card">
+      <p class="plan-name">${p.name}</p>
+      <p class="plan-desc">${p.desc}</p>
+      <div class="plan-price">
+        <span class="amount">₹${p.priceInr}</span>
+        <span class="period">&nbsp;·&nbsp;${p.minutes} min</span>
+      </div>
+      <button class="btn-plan btn-plan-secondary" onclick="buyPlan('${p.id}', this)">Get This Pack</button>
+    </div>
+  `).join('');
+}
+
+function showError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.toggle('show', !!msg);
+}
+
+function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+
+function friendlyError(code) {
+  const map = {
+    'auth/user-not-found':     'No account found with this email',
+    'auth/wrong-password':     'Incorrect password',
+    'auth/email-already-in-use': 'Email already registered — try signing in',
+    'auth/weak-password':      'Password must be at least 6 characters',
+    'auth/invalid-email':      'Invalid email address',
+    'auth/too-many-requests':  'Too many attempts. Try again later',
+    'auth/invalid-credential': 'Incorrect email or password',
+  };
+  return map[code] || 'Something went wrong. Please try again';
+}
+</script>
+</body>
+</html>
