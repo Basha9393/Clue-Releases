@@ -38,6 +38,7 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', sans-serif;
+      padding-top: 94px;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
@@ -50,7 +51,7 @@
 
     /* ── NAV ── */
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      position: fixed; top: 38px; left: 0; right: 0; z-index: 1000;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 40px; height: 56px;
       background: var(--bg);
@@ -102,7 +103,7 @@
 
     /* mobile menu */
     .mobile-menu {
-      display: none; position: fixed; top: 56px; left: 0; right: 0; z-index: 999;
+      display: none; position: fixed; top: 94px; left: 0; right: 0; z-index: 999;
       background: var(--bg2); border-bottom: 1px solid var(--border);
       padding: 20px 24px; flex-direction: column; gap: 4px;
     }
@@ -739,9 +740,10 @@
 
     /* ── ANNOUNCEMENT BAR ── */
     .announce-bar {
-      position: relative; z-index: 1001;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1001;
+      height: 38px;
       background: var(--accent-dim); border-bottom: 1px solid var(--accent-border);
-      padding: 9px 24px; display: flex; align-items: center; justify-content: center; gap: 16px;
+      padding: 0 24px; display: flex; align-items: center; justify-content: center; gap: 16px;
       font-size: 12px; font-family: 'JetBrains Mono', monospace;
     }
     .announce-bar .ab-text { color: var(--text2); }
